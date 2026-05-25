@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q1 Impossible Travel Alert</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="ctf-shared.css">
+<style>
+:root{--bg:#0f1419;--card:#1a2332;--accent:#3b82f6;--ok:#22c55e;--bad:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Outfit,sans-serif;background:var(--bg);color:#e2e8f0}
+.back{display:inline-block;margin:1rem;color:var(--accent);text-decoration:none}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid #334155;gap:1rem}
+#score{font-size:2rem;font-weight:700;color:var(--accent)}
+.bar{height:10px;width:200px;background:#334155;border-radius:5px;margin-top:.5rem;overflow:hidden}
+#bar{height:100%;background:linear-gradient(90deg,var(--accent),#a855f7);width:0;transition:.4s}
+.overview{background:var(--card);border-color:#334155;color:#cbd5e1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;padding:1rem 2rem}
+.card{background:var(--card);border-radius:12px;padding:1.2rem;border:1px solid #334155}
+.card h2{font-size:1rem;color:var(--accent);margin-bottom:.75rem}
+.log{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:#0f172a;padding:.9rem;border-radius:8px}
+.globe{width:100px;height:100px;margin:1rem auto;border-radius:50%;background:conic-gradient(#1e40af,#3b82f6,#1e3a8a);animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px #ef444440}}
+.alert{border-left:4px solid var(--bad)}
+button.chk{background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;padding:.55rem 1rem}
+#flag{display:none;margin:2rem;padding:1.5rem;text-align:center;border:2px solid var(--ok);border-radius:12px}
+#flag.show{display:block}
+input[type=number],select{padding:.5rem;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;width:100%}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html"><i class="fa fa-arrow-left"></i> Hub</a>
+<header>
+<div><h1><i class="fa fa-plane-slash"></i> Impossible Travel Alert</h1><p style="color:#94a3b8">john.doe@company.com</p></div>
+<div class="actions"><div>Score <span id="score">0</span>/100</div><div id="scoreSub" style="font-size:.8rem;color:#94a3b8"></div><div class="bar"><div id="bar"></div></div><button class="btn-reset" type="button" id="btnReset">Reset challenge</button></div>
+</header>
+<div class="overview">
+<h2>Scenario briefing</h2>
+<p>VPN login from <strong>Mumbai</strong> at 09:00 IST, then <strong>Salesforce</strong> from <strong>New York</strong> at 09:05 IST. Act as SOC analyst: timeline, true positive, extra logs, response, root cause.</p>
+</div>
+<div class="grid">
+<div class="card alert pulse"><h2><i class="fa fa-earth-americas"></i> Map</h2><div class="globe"></div><p style="text-align:center">203.0.113.45 (IN) to 198.51.100.67 (US)</p></div>
+<div class="card"><h2>VPN Log</h2><div class="log">2024-05-20 09:00:12 IST | VPN | john.doe@company.com | 203.0.113.45 | Mumbai | OK</div></div>
+<div class="card"><h2>Salesforce Log</h2><div class="log">2024-05-20 09:05:03 IST | SAML | john.doe@company.com | 198.51.100.67 | New York | OK</div></div>
+</div>
+<main class="grid">
+<div class="card"><h2>Task 1 - Time difference</h2>
+<input type="number" id="t1" placeholder="e.g. 120">
+<div class="toolbar"><button class="chk" data-task="1">Check</button><button class="btn-hint" data-hint="1">Hint (-5)</button></div>
+<p class="hint-line" id="hint-1"></p><div id="f1" class="fb"></div></div>
+<div class="card"><h2>Task 2 - True positive?</h2>
+<label class="choice"><input type="radio" name="tp" value="no"><span>No - benign / VPN glitch</span></label>
+<label class="choice"><input type="radio" name="tp" value="yes"><span>Yes - impossible travel</span></label>
+<label class="choice"><input type="checkbox" id="j2"><span>Physically impossible travel window</span></label>
+<label class="choice"><input type="checkbox" id="j1"><span>Same-day routine login pattern</span></label>
+<label class="choice"><input type="checkbox" id="j3"><span>Distance over 10,000 km in ~5 min</span></label>
+<div class="toolbar"><button class="chk" data-task="2">Check</button><button class="btn-hint" data-hint="2">Hint (-5)</button></div>
+<p class="hint-line" id="hint-2"></p><div id="f2" class="fb"></div></div>
+<div class="card"><h2>Task 3 - Critical log</h2>
+<div class="log">A) MFA OK NYC 09:04<br>B) 12x failed VPN Mumbai 08:55<br>C) HR profile update</div>
+<select id="t3"><option value="">Pick</option><option>B - Failed VPN Mumbai</option><option>C - HR profile update</option><option>A - MFA OK NYC</option></select>
+<div class="toolbar"><button class="chk" data-task="3">Check</button><button class="btn-hint" data-hint="3">Hint (-5)</button></div>
+<p class="hint-line" id="hint-3"></p><div id="f3" class="fb"></div></div>
+<div class="card"><h2>Task 4 - Response</h2>
+<label class="choice"><input type="checkbox" id="a4"><span>Email user only (no lock)</span></label>
+<label class="choice"><input type="checkbox" id="a3"><span>Audit data access</span></label>
+<label class="choice"><input type="checkbox" id="a1"><span>Disable account</span></label>
+<label class="choice"><input type="checkbox" id="a2"><span>Force password reset</span></label>
+<div class="toolbar"><button class="chk" data-task="4">Check</button><button class="btn-hint" data-hint="4">Hint (-5)</button></div>
+<p class="hint-line" id="hint-4"></p><div id="f4" class="fb"></div></div>
+<div class="card"><h2>Task 5 - Root cause</h2>
+<select id="t5"><option value="">Pick</option><option>Phishing / stolen session</option><option>DNS glitch on proxy</option><option>Legitimate business travel</option></select>
+<div class="toolbar"><button class="chk" data-task="5">Check</button><button class="btn-hint" data-hint="5">Hint (-5)</button></div>
+<p class="hint-line" id="hint-5"></p><div id="f5" class="fb"></div></div>
+</main>
+<div id="flag"><p style="font-family:monospace;font-size:1.3rem;color:var(--ok)">FLAG{IMPOSSIBLE_TRAVEL_TRUE}</p></div>
+<script src="ctf-engine.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const CTF=initCTF({id:'q01',flag:'FLAG{IMPOSSIBLE_TRAVEL_TRUE}'});
+const hints={1:'Subtract the two timestamps (same TZ shown).',2:'Can a user physically be in both cities in that window?',3:'What happened immediately before the successful logins?',4:'Account takeover playbook - not notify-only.',5:'Two continents in minutes implies stolen credentials.'};
+document.querySelectorAll('.chk').forEach(b=>b.onclick=()=>{const n=+b.dataset.task;
+const ok=n===1?$('t1').value==='5':n===2?document.querySelector('input[name=tp]:checked')?.value==='yes'&&$('j2').checked&&$('j3').checked&&!$('j1').checked:n===3?$('t3').value.indexOf('B')>=0:n===4?$('a1').checked&&$('a2').checked&&$('a3').checked&&!$('a4').checked:$('t5').value.includes('Phishing');
+CTF.check(n,ok,'f'+n);});
+document.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>CTF.hint(+b.dataset.hint,hints[+b.dataset.hint],'hint-'+b.dataset.hint));
+$('btnReset').onclick=()=>CTF.reset();
+</script>
+</body>
+</html>

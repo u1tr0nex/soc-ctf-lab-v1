@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q9 Data Exfiltration via Email</title>
+<link rel="stylesheet" href="ctf-shared.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#fef2f2;color:#1f2937}
+.back{margin:1rem;color:#b91c1c;text-decoration:none}
+header{padding:1rem 2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.overview{background:#fff;border-color:#fecaca;color:#475569}
+.envelope{margin:1.5rem auto;width:280px;min-height:140px;background:#fff;border:2px solid #fca5a5;border-radius:8px;text-align:center;padding:1.5rem 1rem;animation:send 2s ease-in-out infinite}
+@keyframes send{50%{transform:translateX(12px);box-shadow:0 0 16px #ef444440}}
+.recall-note{font-size:.85rem;color:#64748b;margin:0 2rem 1rem;max-width:640px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;padding:1rem 2rem 2rem}
+.card{background:#fff;padding:1rem;border-radius:10px;box-shadow:0 4px 12px #0001;overflow:hidden}
+button.chk{background:#dc2626;color:#fff;border:none;padding:.5rem 1rem;border-radius:6px;cursor:pointer}
+.btn-recall{background:#f59e0b;color:#1f2937;font-size:.85rem}
+#flag{display:none;margin:2rem;text-align:center;background:#dcfce7;padding:1rem;border-radius:8px}
+#flag.show{display:block}
+select{padding:.5rem;border:1px solid #d1d5db;border-radius:6px;width:100%;background:#fff}
+.bar{height:8px;width:200px;background:#fee2e2;border-radius:4px;overflow:hidden;margin-top:.4rem}
+#bar{height:100%;background:#dc2626;width:0;transition:.3s}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">Back</a>
+<header>
+<div><h1>Email Exfil - priya.sharma</h1></div>
+<div class="actions"><div>Score <span id="score">0</span>/100</div><div class="bar"><div id="bar"></div></div><button class="btn-reset" type="button" id="btnReset">Reset challenge</button></div>
+</header>
+<div class="overview">
+<h2>Scenario briefing</h2>
+<p>Encrypted ZIP to competitor domain; password sent in a <strong>second email</strong> (DLP bypass). Investigate policy, response, compromise, remediation.</p>
+</div>
+<div class="envelope"><strong style="color:#dc2626">Q1_Financials.zip</strong><br><small>to external@competitor.com</small><br><br><small>Email 2: password in separate message</small></div>
+<main class="grid">
+<div class="card"><h3>Task 1 - DLP bypass</h3>
+<select id="t1"><option value="">Select</option><option>Password sent in separate email</option><option>Single encrypted email only</option><option>Marketing newsletter blast</option></select>
+<div class="toolbar"><button class="chk" data-task="1">Check</button><button class="btn-hint" data-hint="1">Hint (-5)</button></div>
+<p class="hint-line" id="hint-1"></p><div id="f1" class="fb"></div></div>
+<div class="card"><h3>Task 2 - Authorized?</h3>
+<select id="t2"><option value="">Select</option><option>Policy violation</option><option>Approved vendor transfer</option><option>Internal HR distribution</option></select>
+<div class="toolbar"><button class="chk" data-task="2">Check</button><button class="btn-hint" data-hint="2">Hint (-5)</button></div>
+<p class="hint-line" id="hint-2"></p><div id="f2" class="fb"></div></div>
+<div class="card"><h3>Task 3 - Immediate actions</h3>
+<label class="choice"><input type="checkbox" id="a2"><span>Block recipient domain</span></label>
+<label class="choice"><input type="checkbox" id="a3"><span>Suspend account</span></label>
+<label class="choice"><input type="checkbox" id="a1"><span>Recall / block emails</span></label>
+<p class="recall-note"><strong>Simulate Recall Email</strong> (orange button): practice clicking your org's recall workflow after selecting actions above. It does not award points - only shows a confirmation message for training.</p>
+<div class="toolbar">
+<button class="chk" data-task="3">Check</button>
+<button class="btn-recall" type="button" id="recallBtn">Simulate Recall Email</button>
+<button class="btn-hint" data-hint="3">Hint (-5)</button>
+</div>
+<p id="recallMsg" style="font-size:.85rem;color:#b45309;min-height:1.2em"></p>
+<p class="hint-line" id="hint-3"></p><div id="f3" class="fb"></div></div>
+<div class="card"><h3>Task 4 - Compromise?</h3>
+<div style="font-family:monospace;font-size:.8rem;margin:.5rem 0">03:12 login Russia IP success<br>09:00 login India usual</div>
+<select id="t4"><option value="">Select</option><option>Account likely compromised - unusual geo</option><option>Normal VPN</option><option>User on approved travel</option></select>
+<div class="toolbar"><button class="chk" data-task="4">Check</button><button class="btn-hint" data-hint="4">Hint (-5)</button></div>
+<p class="hint-line" id="hint-4"></p><div id="f4" class="fb"></div></div>
+<div class="card"><h3>Task 5 - Remediation</h3>
+<label class="choice"><input type="checkbox" id="r3"><span>Allow all competitor mail</span></label>
+<label class="choice"><input type="checkbox" id="r1"><span>DLP rules for encrypted ZIP + external</span></label>
+<label class="choice"><input type="checkbox" id="r2"><span>Block password-in-second-email pattern</span></label>
+<div class="toolbar"><button class="chk" data-task="5">Check</button><button class="btn-hint" data-hint="5">Hint (-5)</button></div>
+<p class="hint-line" id="hint-5"></p><div id="f5" class="fb"></div></div>
+</main>
+<div id="flag"><p style="font-family:monospace;color:#166534;font-size:1.2rem">FLAG{DATA_EXFIL_EMAIL}</p></div>
+<script src="ctf-engine.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const CTF=initCTF({id:'q09',flag:'FLAG{DATA_EXFIL_EMAIL}'});
+const hints={1:'Two-step exfil defeats DLP scanning.',2:'competitor.com is not an approved partner.',3:'Recall, block domain, suspend user.',4:'Unusual country login before exfil.',5:'Tighten DLP - do not allow competitor mail.'};
+$('recallBtn').onclick=()=>{$('recallMsg').textContent='Recall request submitted for both messages (simulation only - no points).';};
+document.querySelectorAll('.chk').forEach(b=>b.onclick=()=>{const n=+b.dataset.task;
+const ok=n===1?$('t1').value.includes('separate'):n===2?$('t2').value.includes('violation'):n===3?$('a1').checked&&$('a2').checked&&$('a3').checked:n===4?$('t4').value.includes('compromised'):$('r1').checked&&$('r2').checked&&!$('r3').checked;
+CTF.check(n,ok,'f'+n);});
+document.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>CTF.hint(+b.dataset.hint,hints[+b.dataset.hint],'hint-'+b.dataset.hint));
+$('btnReset').onclick=()=>{CTF.reset();$('recallMsg').textContent='';};
+</script>
+</body>
+</html>

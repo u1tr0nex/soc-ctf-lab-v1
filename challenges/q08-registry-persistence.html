@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q8 Registry Persistence</title>
+<link rel="stylesheet" href="ctf-shared.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,sans-serif;background:#1e1e1e;color:#d4d4d4}
+.back{margin:1rem;color:#569cd6;text-decoration:none}
+header{padding:1rem 2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.overview{background:#252526;border-color:#3c3c3c}
+.reg{margin:1rem 2rem;background:#252526;padding:1rem;border:1px solid #3c3c3c;font-family:Consolas,monospace;font-size:.9rem;border-radius:4px}
+.hl{background:#4a1d1d;border:1px solid #f44747;padding:.2rem .4rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;padding:1rem 2rem}
+.card{background:#252526;padding:1rem;border-radius:8px;border:1px solid #3c3c3c;overflow:hidden}
+.chip{display:inline-block;background:#264f78;padding:.35rem .65rem;margin:.25rem;border-radius:4px;cursor:pointer;font-size:.85rem}
+.drag-zone{min-height:50px;border:2px dashed #569cd6;border-radius:8px;padding:.5rem;margin:.5rem 0;font-size:.9rem}
+button.chk{background:#0e639c;color:#fff;border:none;padding:.5rem 1rem;border-radius:4px;cursor:pointer}
+#flag{display:none;margin:2rem;text-align:center;border:1px solid #4ec9b0;padding:1rem;border-radius:8px}
+#flag.show{display:block}
+select,input{padding:.4rem;background:#1e1e1e;color:#d4d4d4;border:1px solid #3c3c3c;width:100%;border-radius:4px}
+.bar{height:8px;width:200px;background:#333;border-radius:4px;overflow:hidden;margin-top:.4rem}
+#bar{height:100%;background:#0e639c;width:0;transition:.3s}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">Back</a>
+<header>
+<div><h1>Registry Run Key Persistence</h1></div>
+<div class="actions"><div>Score <span id="score">0</span>/100</div><div class="bar"><div id="bar"></div></div><button class="btn-reset" type="button" id="btnReset">Reset challenge</button></div>
+</header>
+<div class="overview">
+<h2>Scenario briefing</h2>
+<p>Run key value <strong>WindowsUpdate</strong> points to <code>C:\Users\Public\svchost.exe</code>, created by PowerShell.</p>
+</div>
+<div class="reg">HKLM\Software\Microsoft\Windows\CurrentVersion\Run<br>
+<span class="hl">"WindowsUpdate" = C:\Users\Public\svchost.exe</span><br>
+<small style="color:#808080">Parent: powershell.exe</small></div>
+<main class="grid">
+<div class="card"><h3>Task 1 - Mechanism</h3>
+<input type="text" id="t1" placeholder="e.g. Scheduled Task">
+<div class="toolbar"><button class="chk" data-task="1">Check</button><button class="btn-hint" data-hint="1">Hint (-5)</button></div>
+<p class="hint-line" id="hint-1"></p><div id="f1" class="fb"></div></div>
+<div class="card"><h3>Task 2 - Masquerade</h3>
+<select id="t2"><option value="">Select</option><option>Real Windows Update does not use Run value named WindowsUpdate pointing to Public</option><option>Normal behavior</option><option>Scheduled task in Task Scheduler only</option></select>
+<div class="toolbar"><button class="chk" data-task="2">Check</button><button class="btn-hint" data-hint="2">Hint (-5)</button></div>
+<p class="hint-line" id="hint-2"></p><div id="f2" class="fb"></div></div>
+<div class="card"><h3>Task 3 - Path</h3>
+<select id="t3"><option value="">Select</option><option>svchost.exe belongs in System32 not Public</option><option>Path is standard for temp tools</option><option>Public folder is normal for svchost</option></select>
+<div class="toolbar"><button class="chk" data-task="3">Check</button><button class="btn-hint" data-hint="3">Hint (-5)</button></div>
+<p class="hint-line" id="hint-3"></p><div id="f3" class="fb"></div></div>
+<div class="card"><h3>Task 4 - Parent process</h3>
+<select id="t4"><option value="">Select</option><option>Legitimate SCCM deployment script</option><option>Expected daily inventory scan</option><option>PowerShell creating Run keys is abnormal</option></select>
+<div class="toolbar"><button class="chk" data-task="4">Check</button><button class="btn-hint" data-hint="4">Hint (-5)</button></div>
+<p class="hint-line" id="hint-4"></p><div id="f4" class="fb"></div></div>
+<div class="card"><h3>Task 5 - Containment actions</h3>
+<p>Select all that apply for proper response:</p>
+<label class="choice"><input type="checkbox" id="s5c"><span>Ignore and wait for next patch cycle</span></label>
+<label class="choice"><input type="checkbox" id="s5a"><span>Delete the malicious Run registry value</span></label>
+<label class="choice"><input type="checkbox" id="s5b"><span>Quarantine C:\Users\Public\svchost.exe</span></label>
+<div class="toolbar">
+<button class="chk" data-task="5">Check</button>
+<button class="btn-hint" data-hint="5">Hint (-5)</button>
+</div>
+<p class="hint-line" id="hint-5"></p><div id="f5" class="fb"></div></div>
+</main>
+<div id="flag"><p style="font-family:monospace;color:#4ec9b0">FLAG{PERSISTENCE_RUN_KEY}</p></div>
+<script src="ctf-engine.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const CTF=initCTF({id:'q08',flag:'FLAG{PERSISTENCE_RUN_KEY}'});
+const hints={1:'Startup registry location for persistence.',2:'Name mimics Windows but path is wrong.',3:'Compare to legitimate svchost directory.',4:'Scripting engine plus Run key is rare for legit software.',5:'Delete the Run value and quarantine the file. Do not choose ignore.'};
+document.querySelectorAll('.chk').forEach(b=>b.onclick=()=>{const n=+b.dataset.task;
+const ok=n===1?/run/i.test($('t1').value):n===2?$('t2').value.includes('Public')||$('t2').value.includes('does not'):n===3?$('t3').value.includes('System32'):n===4?$('t4').value.includes('abnormal'):$('s5a').checked&&$('s5b').checked&&!$('s5c').checked;
+CTF.check(n,ok,'f'+n);});
+document.querySelectorAll('[data-hint]').forEach(b=>b.onclick=()=>CTF.hint(+b.dataset.hint,hints[+b.dataset.hint],'hint-'+b.dataset.hint));
+$('btnReset').onclick=()=>CTF.reset();
+</script>
+</body>
+</html>

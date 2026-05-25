@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q10 Unusual Outbound SMB</title>
+<link rel="stylesheet" href="ctf-shared.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#111827;color:#e5e7eb}
+.back{margin:1rem;color:#60a5fa;text-decoration:none}
+header{padding:1rem 2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.overview{background:#1f2937;border-color:#374151}
+.fw{margin:1rem 2rem;padding:1rem;background:#1f2937;border-radius:8px}
+.rule{opacity:0;padding:.5rem;background:#14532d;border:1px solid #22c55e;border-radius:6px;margin-top:.5rem;transition:opacity .5s}
+.rule.show{opacity:1}
+.pcap{font-family:monospace;font-size:.75rem;background:#0f172a;padding:1rem;margin:1rem 2rem;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;padding:1rem 2rem 2rem}
+.card{background:#1f2937;padding:1rem;border-radius:8px;overflow:hidden}
+button.chk{background:#2563eb;color:#fff;border:none;padding:.5rem 1rem;border-radius:6px;cursor:pointer}
+#flag{display:none;margin:2rem;text-align:center;border:1px solid #4ade80;padding:1rem;border-radius:8px}
+#flag.show{display:block}
+select{width:100%;max-width:100%;box-sizing:border-box;padding:.5rem;background:#0f172a;color:#e5e7eb;border:1px solid #475569;border-radius:6px;font-size:.9rem}
+.bar{height:8px;width:200px;background:#374151;border-radius:4px;overflow:hidden;margin-top:.4rem}
+#bar{height:100%;background:#2563eb;width:0;transition:.3s}
+#scoreSub{font-size:.8rem;color:#94a3b8}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">Back</a>
+<header>
+<div><h1>Outbound SMB - 192.168.1.150 to 45.33.22.11:445</h1></div>
+<div class="actions">
+<div>Score <span id="score">0</span>/100</div>
+<div id="scoreSub"></div>
+<div class="bar"><div id="bar"></div></div>
+<button class="btn-reset" type="button" id="btnReset">Reset challenge</button>
+</div>
+</header>
+<div class="overview">
+<h2>Scenario briefing</h2>
+<p>Firewall saw <strong>SMB (TCP 445)</strong> from internal host to an <strong>internet</strong> IP. Review VT intel, block rule demo, share enumeration logs.</p>
+</div>
+<div class="fw"><strong>Firewall</strong>
+<p>ALLOW outbound 445 to 45.33.22.11 (detected)</p>
+<button type="button" id="btnBlock" style="padding:.4rem .8rem;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer">Block Rule (simulate)</button>
+<div class="rule" id="rule">DENY tcp/445 to 45.33.22.11 - APPLIED</div></div>
+<div class="pcap">SMB2 Negotiate | 192.168.1.150:445 -&gt; 45.33.22.11 | Tree Connect</div>
+<main class="grid">
+<div class="card"><h3>Task 1 - Why anomalous?</h3>
+<select id="t1">
+<option value="">Select</option>
+<option>SMB must not go to the public internet</option>
+<option>Normal cloud backup over SMB</option>
+<option>Azure file sync over WAN</option>
+</select>
+<div class="toolbar"><button type="button" class="chk" data-task="1">Check</button><button type="button" class="btn-hint" data-hint="1">Hint (-5)</button></div>
+<p class="hint-line" id="hint-1"></p><div id="f1" class="fb"></div></div>
+<div class="card"><h3>Task 2 - Process</h3>
+<div style="font-size:.8rem;font-family:monospace;margin:.5rem 0">netstat: unknown.exe :445 -&gt; 45.33.22.11</div>
+<select id="t2">
+<option value="">Select</option>
+<option>unknown.exe (not lsass legit path)</option>
+<option>winlogon.exe</option>
+<option>System</option>
+</select>
+<div class="toolbar"><button type="button" class="chk" data-task="2">Check</button><button type="button" class="btn-hint" data-hint="2">Hint (-5)</button></div>
+<p class="hint-line" id="hint-2"></p><div id="f2" class="fb"></div></div>
+<div class="card"><h3>Task 3 - Threat intel</h3>
+<div style="font-size:.85rem;margin:.5rem 0">VirusTotal: 45.33.22.11 - 38/70 malicious, ransomware tags</div>
+<select id="t3">
+<option value="">Select</option>
+<option>Malicious</option>
+<option>Clean</option>
+<option>Unknown</option>
+</select>
+<div class="toolbar"><button type="button" class="chk" data-task="3">Check</button><button type="button" class="btn-hint" data-hint="3">Hint (-5)</button></div>
+<p class="hint-line" id="hint-3"></p><div id="f3" class="fb"></div></div>
+<div class="card"><h3>Task 4 - Actions</h3>
+<label class="choice"><input type="checkbox" id="a3"><span>Send awareness email only</span></label>
+<label class="choice"><input type="checkbox" id="a2"><span>Isolate 192.168.1.150</span></label>
+<label class="choice"><input type="checkbox" id="a1"><span>Block outbound SMB at firewall</span></label>
+<div class="toolbar"><button type="button" class="chk" data-task="4">Check</button><button type="button" class="btn-hint" data-hint="4">Hint (-5)</button></div>
+<p class="hint-line" id="hint-4"></p><div id="f4" class="fb"></div></div>
+<div class="card"><h3>Task 5 - Lateral movement</h3>
+<div style="font-size:.8rem">Logs: enumerate fileserver finance and hr shares</div>
+<select id="t5">
+<option value="">Select</option>
+<option>User opened Outlook</option>
+<option>Printer driver update</option>
+<option>Share enumeration - possible ransomware staging</option>
+</select>
+<div class="toolbar"><button type="button" class="chk" data-task="5">Check</button><button type="button" class="btn-hint" data-hint="5">Hint (-5)</button></div>
+<p class="hint-line" id="hint-5"></p><div id="f5" class="fb"></div></div>
+</main>
+<div id="flag"><p style="font-family:monospace;color:#4ade80;font-size:1.2rem">FLAG{SMB_OUTBOUND_MALWARE}</p></div>
+<script src="ctf-engine.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  function g(id) { return document.getElementById(id); }
+  var CTF = initCTF({ id: "q10", flag: "FLAG{SMB_OUTBOUND_MALWARE}" });
+  var hints = {
+    1: "SMB is for LAN file sharing, not the public Internet.",
+    2: "Which process name is not a standard service?",
+    3: "Read the detection ratio summary.",
+    4: "Block protocol and isolate endpoint (not email only).",
+    5: "Staging before ransomware spreads.",
+  };
+  document.querySelectorAll(".chk").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var n = parseInt(btn.getAttribute("data-task"), 10);
+      var ok =
+        n === 1
+          ? g("t1").value.indexOf("internet") >= 0
+          : n === 2
+          ? g("t2").value.indexOf("unknown") >= 0
+          : n === 3
+          ? g("t3").value === "Malicious"
+          : n === 4
+          ? g("a1").checked && g("a2").checked && !g("a3").checked
+          : g("t5").value.indexOf("enumeration") >= 0;
+      CTF.check(n, ok, "f" + n);
+    });
+  });
+  document.querySelectorAll("[data-hint]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var n = parseInt(btn.getAttribute("data-hint"), 10);
+      CTF.hint(n, hints[n], "hint-" + n);
+    });
+  });
+  g("btnReset").addEventListener("click", function () {
+    CTF.reset();
+    g("rule").classList.remove("show");
+  });
+  g("btnBlock").addEventListener("click", function () {
+    g("rule").classList.add("show");
+  });
+});
+</script>
+</body>
+</html>

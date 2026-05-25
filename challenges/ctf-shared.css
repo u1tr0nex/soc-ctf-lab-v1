@@ -1,0 +1,14 @@
+.toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.5rem}
+.toolbar button,.toolbar .btn-reset{padding:.45rem .9rem;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+.btn-reset{background:#475569;color:#fff}
+.btn-hint{background:#334155;color:#cbd5e1;font-size:.85rem}
+.overview{margin:1rem 2rem;padding:1rem 1.25rem;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:.88rem;line-height:1.55}
+.overview h2{font-size:1rem;margin-bottom:.5rem}
+.overview ul{margin:.5rem 0 0 1.1rem}
+.choice{display:flex;align-items:flex-start;gap:.65rem;margin:.55rem 0;cursor:pointer;line-height:1.45;max-width:100%}
+.choice input[type=radio],.choice input[type=checkbox]{width:1rem;min-width:1rem;height:1rem;margin:.2rem 0 0;padding:0;flex-shrink:0}
+.choice span{flex:1;word-break:break-word}
+.card select,.card input[type=text],.card input[type=number]{width:100%;max-width:100%;box-sizing:border-box}
+.hint-line{margin-top:.35rem;font-size:.82rem;color:#94a3b8;min-height:1.2em}
+.fb{margin-top:.5rem;font-size:.9rem}.fb.ok{color:#4ade80}.fb.bad{color:#f87171}
+header .actions{text-align:right}
